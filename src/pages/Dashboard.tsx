@@ -1,11 +1,11 @@
-
 import React from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Users, BookOpen, DollarSign, Calendar } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { TrendingUp, TrendingDown, Users, BookOpen, DollarSign, Calendar, Star } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const Dashboard = () => {
   const enrollmentData = [
@@ -53,6 +53,19 @@ const Dashboard = () => {
   const supportRequests = [
     { name: 'Vincent Lopez', message: 'Thanks for contact us with your issues...', time: '6 min ago', avatar: 'VL' },
   ];
+
+  const trafficSources = [
+    { name: 'Organic Search', value: 4305, color: '#8b5cf6' },
+    { name: 'Referrals', value: 482, color: '#ec4899' },
+    { name: 'Social Media', value: 859, color: '#06b6d4' },
+    { name: 'Others', value: 138, color: '#f59e0b' },
+  ];
+
+  const activeStudents = {
+    monthly: { value: '9.28K', change: '+4.63%', trend: 'up' },
+    weekly: { value: '2.69K', change: '+1.92%', trend: 'down' },
+    daily: { value: '0.94K', change: '+3.45%', trend: 'up' }
+  };
 
   return (
     <AdminLayout>
@@ -179,9 +192,146 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* New Student Review Card */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarFallback className="bg-orange-100 text-orange-600 font-semibold">
+                    LH
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium text-gray-900">Larry Henry</p>
+                  <p className="text-sm text-gray-500">larry108@example.com</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-1 mb-2">
+                {[1, 2, 3, 4].map((star) => (
+                  <Star key={star} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                ))}
+                <Star className="h-4 w-4 text-gray-300" />
+                <span className="text-sm text-gray-600 ml-2">24 Reviews</span>
+              </div>
+              <p className="text-sm text-gray-600">Thanks for contact us with your issues...</p>
+              <p className="text-xs text-gray-500 mt-2">3 Hours ago</p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Charts and Lists */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Active Students */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Active Students</CardTitle>
+                <p className="text-sm text-gray-600 mt-1">How do your students visited in the time.</p>
+              </div>
+              <Button variant="ghost" size="sm">View All</Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Monthly</p>
+                  <p className="text-2xl font-bold text-gray-900">{activeStudents.monthly.value}</p>
+                  <div className={`flex items-center justify-center space-x-1 text-sm ${
+                    activeStudents.monthly.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {activeStudents.monthly.trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    <span>{activeStudents.monthly.change}</span>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Weekly</p>
+                  <p className="text-2xl font-bold text-gray-900">{activeStudents.weekly.value}</p>
+                  <div className={`flex items-center justify-center space-x-1 text-sm ${
+                    activeStudents.weekly.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {activeStudents.weekly.trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    <span>{activeStudents.weekly.change}</span>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Daily (Avg)</p>
+                  <p className="text-2xl font-bold text-gray-900">{activeStudents.daily.value}</p>
+                  <div className={`flex items-center justify-center space-x-1 text-sm ${
+                    activeStudents.daily.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {activeStudents.daily.trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    <span>{activeStudents.daily.change}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={enrollmentData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Bar dataKey="students" fill="#8b5cf6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Traffic Sources */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Traffic Sources</CardTitle>
+                <p className="text-sm text-gray-600 mt-1">30 Days</p>
+              </div>
+              <Button variant="ghost" size="sm">30 Days</Button>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="w-1/2">
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={trafficSources}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {trafficSources.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="w-1/2 space-y-3">
+                  {trafficSources.map((source, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: source.color }}
+                        />
+                        <span className="text-sm text-gray-600">{source.name}</span>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">{source.value.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-600">
+                  🔵 Traffic channels have been generating the most traffics over past days.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Top Categories and Top Courses */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top Categories */}
           <Card>

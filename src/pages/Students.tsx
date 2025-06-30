@@ -8,16 +8,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Search, MoreHorizontal, Plus, Mail, UserMinus, Ban } from 'lucide-react';
+import { Search, MoreHorizontal, Plus, Mail, UserMinus, Ban, Eye, Edit } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import AddStudentModal from '../components/AddStudentModal';
 
 const Students = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
-  const [studentFilter, setStudentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
 
-  const [students] = useState([
+  const [students, setStudents] = useState([
     {
       id: 1,
       name: 'Abu Bin Ishtiyak',
@@ -25,7 +27,7 @@ const Students = () => {
       course: 'Front-end Development',
       phone: '+811 847-4958',
       country: 'United State',
-      status: 'due',
+      status: 'paid',
       paymentStatus: 'Active',
       avatar: 'AB',
       type: 'registered'
@@ -56,18 +58,6 @@ const Students = () => {
     },
     {
       id: 4,
-      name: 'Jane Montgomery',
-      email: 'jane84@example.com',
-      course: 'UI/UX Design with Adobe XD',
-      phone: '+439 271-5360',
-      country: 'Canada',
-      status: 'cancelled',
-      paymentStatus: 'Suspend',
-      avatar: 'JM',
-      type: 'registered'
-    },
-    {
-      id: 5,
       name: 'Frances Burns',
       email: 'frances@example.com',
       course: 'Application Management',
@@ -79,7 +69,7 @@ const Students = () => {
       type: 'registered'
     },
     {
-      id: 6,
+      id: 5,
       name: 'John Smith',
       email: 'john@example.com',
       course: 'General Inquiry',
@@ -91,7 +81,7 @@ const Students = () => {
       type: 'general'
     },
     {
-      id: 7,
+      id: 6,
       name: 'Sarah Wilson',
       email: 'sarah@example.com',
       course: 'Course Information Request',
@@ -104,17 +94,19 @@ const Students = () => {
     }
   ]);
 
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    if (studentFilter === 'registered') {
-      return matchesSearch && student.type === 'registered' && student.status !== 'cancelled';
-    } else if (studentFilter === 'general') {
-      return matchesSearch && student.type === 'general';
-    }
-    return matchesSearch;
-  });
+  const getFilteredStudents = (type: string) => {
+    return students.filter(student => {
+      const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           student.email.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (type === 'registered') {
+        return matchesSearch && student.type === 'registered';
+      } else if (type === 'general') {
+        return matchesSearch && student.type === 'general';
+      }
+      return matchesSearch;
+    });
+  };
 
   const handleSelectStudent = (studentId, checked) => {
     if (checked) {
@@ -124,7 +116,8 @@ const Students = () => {
     }
   };
 
-  const handleSelectAll = (checked) => {
+  const handleSelectAll = (checked, type) => {
+    const filteredStudents = getFilteredStudents(type);
     if (checked) {
       setSelectedStudents(filteredStudents.map(student => student.id));
     } else {
@@ -166,14 +159,14 @@ const Students = () => {
     setSelectedStudents([]);
   };
 
+  const handleAddStudent = (studentData) => {
+    setStudents(prev => [...prev, studentData]);
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'paid':
         return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Paid</Badge>;
-      case 'due':
-        return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">Due</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Cancelled</Badge>;
       case 'inquiry':
         return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Inquiry</Badge>;
       default:
@@ -187,14 +180,138 @@ const Students = () => {
         return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Active</Badge>;
       case 'Inactive':
         return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">Inactive</Badge>;
-      case 'Suspend':
-        return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Suspend</Badge>;
       case 'N/A':
         return <Badge variant="secondary">N/A</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
+
+  const StudentTable = ({ students, type }) => (
+    <Card>
+      <CardContent className="p-0">
+        {/* Bulk Actions */}
+        {selectedStudents.length > 0 && (
+          <div className="p-4 bg-blue-50 border-b">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">
+                {selectedStudents.length} student(s) selected
+              </span>
+              <div className="flex items-center space-x-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <MoreHorizontal className="h-4 w-4 mr-2" />
+                      Actions
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleBulkAction('email')}>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Send Email to All
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleBulkAction('suspend')}>
+                      <Ban className="h-4 w-4 mr-2" />
+                      Suspend Selected
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleBulkAction('remove')}
+                      className="text-red-600"
+                    >
+                      <UserMinus className="h-4 w-4 mr-2" />
+                      Remove Selected
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left py-3 px-4">
+                  <Checkbox
+                    checked={selectedStudents.length === students.length && students.length > 0}
+                    onCheckedChange={(checked) => handleSelectAll(checked, type)}
+                  />
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">User</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Enrolled Courses</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Phone</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Country</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Payment</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-700">
+                  <MoreHorizontal className="h-4 w-4" />
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {students.map((student) => (
+                <tr key={student.id} className="hover:bg-gray-50">
+                  <td className="py-4 px-4">
+                    <Checkbox
+                      checked={selectedStudents.includes(student.id)}
+                      onCheckedChange={(checked) => handleSelectStudent(student.id, checked)}
+                    />
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-purple-100 text-purple-600 font-semibold">
+                          {student.avatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-gray-900">{student.name}</p>
+                        <p className="text-sm text-gray-500">{student.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div>
+                      <p className="font-medium text-gray-900">{student.course}</p>
+                      <button className="text-sm text-blue-600 hover:text-blue-800">View More</button>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-gray-600">{student.phone}</td>
+                  <td className="py-4 px-4 text-gray-600">{student.country}</td>
+                  <td className="py-4 px-4">
+                    {getStatusBadge(student.status)}
+                  </td>
+                  <td className="py-4 px-4">
+                    {getPaymentStatusBadge(student.paymentStatus)}
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Status
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <AdminLayout>
@@ -214,151 +331,36 @@ const Students = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={studentFilter} onValueChange={setStudentFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter students" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Students</SelectItem>
-                <SelectItem value="registered">Registered Students</SelectItem>
-                <SelectItem value="general">General Inquiries</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => setIsAddStudentOpen(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add
             </Button>
           </div>
         </div>
 
-        {/* Bulk Actions */}
-        {selectedStudents.length > 0 && (
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">
-                  {selectedStudents.length} student(s) selected
-                </span>
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleBulkAction('email')}
-                  >
-                    <Mail className="h-4 w-4 mr-2" />
-                    Send Email to All
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleBulkAction('suspend')}
-                  >
-                    <Ban className="h-4 w-4 mr-2" />
-                    Suspend Selected
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleBulkAction('remove')}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <UserMinus className="h-4 w-4 mr-2" />
-                    Remove Selected
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <Tabs defaultValue="registered" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="registered">Registered Students</TabsTrigger>
+            <TabsTrigger value="general">General</TabsTrigger>
+          </TabsList>
 
-        {/* Students Table */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left py-3 px-4">
-                      <Checkbox
-                        checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">User</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Enrolled Courses</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Phone</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Country</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Payment</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                    <th className="text-center py-3 px-4 font-medium text-gray-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredStudents.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50">
-                      <td className="py-4 px-4">
-                        <Checkbox
-                          checked={selectedStudents.includes(student.id)}
-                          onCheckedChange={(checked) => handleSelectStudent(student.id, checked)}
-                        />
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-purple-100 text-purple-600 font-semibold">
-                              {student.avatar}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-gray-900">{student.name}</p>
-                            <p className="text-sm text-gray-500">{student.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div>
-                          <p className="font-medium text-gray-900">{student.course}</p>
-                          <button className="text-sm text-blue-600 hover:text-blue-800">View More</button>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-gray-600">{student.phone}</td>
-                      <td className="py-4 px-4 text-gray-600">{student.country}</td>
-                      <td className="py-4 px-4">
-                        {getStatusBadge(student.status)}
-                      </td>
-                      <td className="py-4 px-4">
-                        {getPaymentStatusBadge(student.paymentStatus)}
-                      </td>
-                      <td className="py-4 px-4 text-center">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Mail className="h-4 w-4 mr-2" />
-                              Send Email
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Ban className="h-4 w-4 mr-2" />
-                              Suspend
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
-                              <UserMinus className="h-4 w-4 mr-2" />
-                              Remove
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+          <TabsContent value="registered">
+            <StudentTable students={getFilteredStudents('registered')} type="registered" />
+          </TabsContent>
+
+          <TabsContent value="general">
+            <StudentTable students={getFilteredStudents('general')} type="general" />
+          </TabsContent>
+        </Tabs>
+
+        <AddStudentModal
+          isOpen={isAddStudentOpen}
+          onClose={() => setIsAddStudentOpen(false)}
+          onAdd={handleAddStudent}
+        />
       </div>
     </AdminLayout>
   );

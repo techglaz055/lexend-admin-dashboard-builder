@@ -5,18 +5,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { 
   LayoutDashboard, 
   BookOpen, 
   Users, 
   MessageSquare, 
-  Settings, 
+  Settings as SettingsIcon,
   Search, 
   Bell, 
   ChevronDown,
   Menu,
-  X
+  X,
+  User,
+  Activity,
+  LogOut
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -38,7 +41,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { name: 'Courses', href: '/courses', icon: BookOpen, hasSubmenu: true },
     { name: 'Students', href: '/students', icon: Users },
     { name: 'Messages', href: '/messages', icon: MessageSquare },
-    { name: 'SEO Settings', href: '/seo-settings', icon: Settings },
+    { name: 'SEO Settings', href: '/seo-settings', icon: SettingsIcon },
+    { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
 
   return (
@@ -172,8 +176,22 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>View Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <SettingsIcon className="mr-2 h-4 w-4" />
+                    <span>Account Setting</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Activity className="mr-2 h-4 w-4" />
+                    <span>Login Activity</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
-                    Sign out
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -8,10 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Search, Plus, Filter } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Search, Plus, Filter, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import AddCourseModal from '../components/AddCourseModal';
 
 const Courses = () => {
-  const [courses] = useState([
+  const [courses, setCourses] = useState([
     {
       id: 1,
       name: 'Responsive Design',
@@ -62,9 +65,19 @@ const Courses = () => {
     }
   ]);
 
+  const [categories] = useState([
+    { id: 1, name: 'Web Development', color: 'bg-orange-500', courses: 85 },
+    { id: 2, name: 'Mobile Application', color: 'bg-blue-500', courses: 70 },
+    { id: 3, name: 'Graphics Design', color: 'bg-green-500', courses: 60 },
+    { id: 4, name: 'Database', color: 'bg-indigo-500', courses: 90 },
+    { id: 5, name: 'Marketing', color: 'bg-cyan-500', courses: 40 },
+    { id: 6, name: 'Machine Learning', color: 'bg-pink-500', courses: 65 }
+  ]);
+
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,6 +100,10 @@ const Courses = () => {
     } else {
       setSelectedCourses([]);
     }
+  };
+
+  const handleAddCourse = (courseData) => {
+    setCourses(prev => [...prev, courseData]);
   };
 
   const getStatusBadge = (status) => {
@@ -116,122 +133,177 @@ const Courses = () => {
               <Filter className="h-4 w-4" />
               <span>Filtered By</span>
             </Button>
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => setIsAddCourseOpen(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Course
             </Button>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center space-x-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search courses..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Tabs defaultValue="categories" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
+            <TabsTrigger value="courses">Course List</TabsTrigger>
+          </TabsList>
 
-        {/* Courses Table */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left py-3 px-4">
-                      <Checkbox
-                        checked={selectedCourses.length === filteredCourses.length && filteredCourses.length > 0}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Course Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Category</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Instructor</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Lesson</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Price</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Deadline</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredCourses.map((course) => (
-                    <tr key={course.id} className="hover:bg-gray-50">
-                      <td className="py-4 px-4">
-                        <Checkbox
-                          checked={selectedCourses.includes(course.id)}
-                          onCheckedChange={(checked) => handleSelectCourse(course.id, checked)}
-                        />
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className={`${course.color} text-white font-semibold`}>
-                              {course.avatar}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-gray-900">{course.name}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-gray-600">{course.category}</td>
-                      <td className="py-4 px-4 text-gray-600">{course.instructor}</td>
-                      <td className="py-4 px-4 text-gray-600">Total lesson: {course.lessons}</td>
-                      <td className="py-4 px-4">
-                        {getStatusBadge(course.status)}
-                      </td>
-                      <td className="py-4 px-4 font-semibold text-gray-900">{course.price}</td>
-                      <td className="py-4 px-4 text-gray-600">{course.deadline}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <TabsContent value="categories">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {categories.map((category) => (
+                <Card key={category.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`w-12 h-12 ${category.color} rounded-lg flex items-center justify-center`}>
+                        <span className="text-white text-lg font-bold">
+                          {category.name.charAt(0)}
+                        </span>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Category
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Category
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">{category.name}</h3>
+                    <p className="text-sm text-gray-600">{category.courses} courses available</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="courses">
+            {/* Filters */}
+            <div className="flex items-center space-x-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search courses..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">Prev</Button>
-                <Button variant="outline" size="sm" className="bg-purple-600 text-white">1</Button>
-                <Button variant="outline" size="sm">2</Button>
-                <span className="text-gray-500">...</span>
-                <Button variant="outline" size="sm">6</Button>
-                <Button variant="outline" size="sm">7</Button>
-                <Button variant="outline" size="sm">Next</Button>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">PAGE</span>
-                <Select defaultValue="1">
-                  <SelectTrigger className="w-16 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="2">2</SelectItem>
-                    <SelectItem value="3">3</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span className="text-sm text-gray-600">OF 102</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Courses Table */}
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="text-left py-3 px-4">
+                          <Checkbox
+                            checked={selectedCourses.length === filteredCourses.length && filteredCourses.length > 0}
+                            onCheckedChange={handleSelectAll}
+                          />
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Course Name</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Category</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Instructor</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Lesson</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Price</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">Deadline</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {filteredCourses.map((course) => (
+                        <tr key={course.id} className="hover:bg-gray-50">
+                          <td className="py-4 px-4">
+                            <Checkbox
+                              checked={selectedCourses.includes(course.id)}
+                              onCheckedChange={(checked) => handleSelectCourse(course.id, checked)}
+                            />
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center space-x-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarFallback className={`${course.color} text-white font-semibold`}>
+                                  {course.avatar}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium text-gray-900">{course.name}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-gray-600">{course.category}</td>
+                          <td className="py-4 px-4 text-gray-600">{course.instructor}</td>
+                          <td className="py-4 px-4 text-gray-600">Total lesson: {course.lessons}</td>
+                          <td className="py-4 px-4">
+                            {getStatusBadge(course.status)}
+                          </td>
+                          <td className="py-4 px-4 font-semibold text-gray-900">{course.price}</td>
+                          <td className="py-4 px-4 text-gray-600">{course.deadline}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm">Prev</Button>
+                    <Button variant="outline" size="sm" className="bg-purple-600 text-white">1</Button>
+                    <Button variant="outline" size="sm">2</Button>
+                    <span className="text-gray-500">...</span>
+                    <Button variant="outline" size="sm">6</Button>
+                    <Button variant="outline" size="sm">7</Button>
+                    <Button variant="outline" size="sm">Next</Button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">PAGE</span>
+                    <Select defaultValue="1">
+                      <SelectTrigger className="w-16 h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="text-sm text-gray-600">OF 102</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        <AddCourseModal
+          isOpen={isAddCourseOpen}
+          onClose={() => setIsAddCourseOpen(false)}
+          onAdd={handleAddCourse}
+        />
       </div>
     </AdminLayout>
   );
