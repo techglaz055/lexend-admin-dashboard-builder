@@ -71,7 +71,10 @@ const Courses = () => {
     { id: 3, name: 'Graphics Design', color: 'bg-green-500', courses: 60 },
     { id: 4, name: 'Database', color: 'bg-indigo-500', courses: 90 },
     { id: 5, name: 'Marketing', color: 'bg-cyan-500', courses: 40 },
-    { id: 6, name: 'Machine Learning', color: 'bg-pink-500', courses: 65 }
+    { id: 6, name: 'Machine Learning', color: 'bg-pink-500', courses: 65 },
+    { id: 7, name: 'Data Science', color: 'bg-purple-500', courses: 55 },
+    { id: 8, name: 'Cloud Computing', color: 'bg-red-500', courses: 78 },
+    { id: 9, name: 'DevOps', color: 'bg-yellow-500', courses: 42 }
   ]);
 
   const [selectedCourses, setSelectedCourses] = useState([]);

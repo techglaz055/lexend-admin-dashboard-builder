@@ -4,7 +4,6 @@ import AdminLayout from '../components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -13,11 +12,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Search, MoreHorizontal, Plus, Mail, UserMinus, Ban, Eye, Edit } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import AddStudentModal from '../components/AddStudentModal';
+import StudentDetailModal from '../components/StudentDetailModal';
+import EditStatusModal from '../components/EditStatusModal';
 
 const Students = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isEditStatusOpen, setIsEditStatusOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const [students, setStudents] = useState([
     {
@@ -163,6 +167,27 @@ const Students = () => {
     setStudents(prev => [...prev, studentData]);
   };
 
+  const handleViewDetails = (student) => {
+    setSelectedStudent(student);
+    setIsDetailOpen(true);
+  };
+
+  const handleEditStatus = (student = null) => {
+    if (student) {
+      setSelectedStudent(student);
+    }
+    setIsDetailOpen(false);
+    setIsEditStatusOpen(true);
+  };
+
+  const handleSaveStatus = (studentId, updates) => {
+    setStudents(prev => prev.map(student => 
+      student.id === studentId 
+        ? { ...student, ...updates }
+        : student
+    ));
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'paid':
@@ -293,11 +318,11 @@ const Students = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewDetails(student)}>
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditStatus(student)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Status
                         </DropdownMenuItem>
@@ -360,6 +385,20 @@ const Students = () => {
           isOpen={isAddStudentOpen}
           onClose={() => setIsAddStudentOpen(false)}
           onAdd={handleAddStudent}
+        />
+
+        <StudentDetailModal
+          isOpen={isDetailOpen}
+          onClose={() => setIsDetailOpen(false)}
+          student={selectedStudent}
+          onEditStatus={() => handleEditStatus()}
+        />
+
+        <EditStatusModal
+          isOpen={isEditStatusOpen}
+          onClose={() => setIsEditStatusOpen(false)}
+          student={selectedStudent}
+          onSave={handleSaveStatus}
         />
       </div>
     </AdminLayout>

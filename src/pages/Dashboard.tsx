@@ -1,3 +1,4 @@
+
 import React from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,10 +49,6 @@ const Dashboard = () => {
     { name: 'WordPress Development', price: '$1,050.00', sold: '15 Sold', avatar: 'WD' },
     { name: 'Machine Learning', price: '$990.00', sold: '10 Sold', avatar: 'ML' },
     { name: 'Responsive Design', price: '$960.00', sold: '12 Sold', avatar: 'RD' },
-  ];
-
-  const supportRequests = [
-    { name: 'Vincent Lopez', message: 'Thanks for contact us with your issues...', time: '6 min ago', avatar: 'VL' },
   ];
 
   const trafficSources = [
@@ -391,31 +388,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Support Requests */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Support Requests</CardTitle>
-            <Button variant="ghost" size="sm">All Requests</Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {supportRequests.map((request, index) => (
-                <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-gray-600">{request.avatar}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{request.name}</p>
-                    <p className="text-sm text-gray-600">{request.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">{request.time}</p>
-                  </div>
-                  <Button variant="outline" size="sm">Reply</Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </AdminLayout>
   );
