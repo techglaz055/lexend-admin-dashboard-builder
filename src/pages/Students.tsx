@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,9 @@ import StudentDetailModal from '../components/StudentDetailModal';
 import EditStatusModal from '../components/EditStatusModal';
 
 const Students = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'registered';
+  
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
@@ -97,6 +100,11 @@ const Students = () => {
       type: 'general'
     }
   ]);
+
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value });
+    setSelectedStudents([]); // Clear selections when switching tabs
+  };
 
   const getFilteredStudents = (type: string) => {
     return students.filter(student => {
@@ -366,7 +374,7 @@ const Students = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="registered" className="space-y-6">
+        <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList>
             <TabsTrigger value="registered">Registered Students</TabsTrigger>
             <TabsTrigger value="general">General</TabsTrigger>
