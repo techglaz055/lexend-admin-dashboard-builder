@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -48,7 +47,8 @@ const Categories = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    subcategories: ''
+    subcategories: '',
+    thumbnail: null as File | null
   });
 
   const handleAddCategory = () => {
@@ -63,7 +63,7 @@ const Categories = () => {
     };
 
     setCategories([...categories, newCategory]);
-    setFormData({ name: '', description: '', subcategories: '' });
+    setFormData({ name: '', description: '', subcategories: '', thumbnail: null });
     setIsAddDialogOpen(false);
     toast({
       title: "Category Added",
@@ -76,7 +76,8 @@ const Categories = () => {
     setFormData({
       name: category.name,
       description: category.description,
-      subcategories: category.subcategories.join(', ')
+      subcategories: category.subcategories.join(', '),
+      thumbnail: null
     });
     setIsAddDialogOpen(true);
   };
@@ -96,7 +97,7 @@ const Categories = () => {
     );
 
     setCategories(updatedCategories);
-    setFormData({ name: '', description: '', subcategories: '' });
+    setFormData({ name: '', description: '', subcategories: '', thumbnail: null });
     setEditingCategory(null);
     setIsAddDialogOpen(false);
     toast({
@@ -112,6 +113,12 @@ const Categories = () => {
       title: "Category Deleted",
       description: `${category.name} has been deleted successfully.`,
     });
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData({ ...formData, thumbnail: e.target.files[0] });
+    }
   };
 
   return (
@@ -152,6 +159,31 @@ const Categories = () => {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
+                </div>
+                <div>
+                  <Label htmlFor="thumbnail">Category thumbnail</Label>
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      id="thumbnail"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleThumbnailChange}
+                      className="hidden"
+                    />
+                    <Input
+                      placeholder="Choose file"
+                      value={formData.thumbnail?.name || ''}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('thumbnail')?.click()}
+                    >
+                      Browse
+                    </Button>
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="subcategory">Subcategory</Label>

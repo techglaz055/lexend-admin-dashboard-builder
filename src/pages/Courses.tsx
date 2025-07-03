@@ -62,6 +62,18 @@ const Courses = () => {
       deadline: '20.4.2021',
       avatar: 'WT',
       color: 'bg-purple-500'
+    },
+    {
+      id: 5,
+      name: 'React Native App Development',
+      category: 'Mobile Application',
+      instructor: 'John Doe',
+      lessons: 18,
+      status: 'pending',
+      price: '$45',
+      deadline: '25.5.2021',
+      avatar: 'RN',
+      color: 'bg-blue-500'
     }
   ]);
 
@@ -80,13 +92,15 @@ const Courses = () => {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [courseFilter, setCourseFilter] = useState('all');
   const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.instructor.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || course.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesCourse = courseFilter === 'all' || course.name === courseFilter;
+    return matchesSearch && matchesStatus && matchesCourse;
   });
 
   const handleSelectCourse = (courseId, checked) => {
@@ -115,8 +129,6 @@ const Courses = () => {
         return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Active</Badge>;
       case 'pending':
         return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">Pending</Badge>;
-      case 'inactive':
-        return <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">Inactive</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -132,10 +144,34 @@ const Courses = () => {
             <p className="text-gray-600 mt-1">You have total {courses.length} Courses.</p>
           </div>
           <div className="flex items-center space-x-3">
-            <Button variant="outline" className="flex items-center space-x-2">
-              <Filter className="h-4 w-4" />
-              <span>Filtered By</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center space-x-2">
+                  <Filter className="h-4 w-4" />
+                  <span>Filtered By</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setCourseFilter('all')}>
+                  All Courses
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCourseFilter('Responsive Design')}>
+                  Responsive Design
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCourseFilter('Android Development')}>
+                  Android Development
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCourseFilter('UI/UX Design')}>
+                  UI/UX Design
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCourseFilter('WordPress Theme Development')}>
+                  WordPress Theme Development
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCourseFilter('React Native App Development')}>
+                  React Native App Development
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button 
               className="bg-purple-600 hover:bg-purple-700"
               onClick={() => setIsAddCourseOpen(true)}
@@ -209,7 +245,6 @@ const Courses = () => {
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
             </div>
